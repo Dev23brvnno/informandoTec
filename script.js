@@ -61,6 +61,8 @@ loginBtn.addEventListener('click', () => {
         publicacionForm.classList.remove('hidden');
         adminPassword.value = '';
         intentosFallidos = 0;
+        document.body.classList.add('autenticado');
+        cargarPublicaciones();
     } else {
         intentosFallidos++;
         ultimoIntento = ahora;
@@ -162,12 +164,17 @@ function editarPublicacion(publicacion) {
         boldToggle.style.fontWeight = 'normal';
         publicarBtn.textContent = 'Publicar';
         publicarBtn.onclick = publicarNuevo;
+        
+        guardarPublicaciones();
+        cargarPublicaciones();
     };
 }
 
 function borrarPublicacion(publicacion) {
     if (confirm('¿Estás seguro de que quieres borrar esta publicación?')) {
         publicacion.remove();
+        guardarPublicaciones();
+        cargarPublicaciones();
     }
 }
 
@@ -187,10 +194,46 @@ function publicarNuevo() {
         nuevaPublicacion.style.fontWeight = 'normal';
         isBold = false;
         boldToggle.style.fontWeight = 'normal';
+        
+        guardarPublicaciones();
+        cargarPublicaciones();
     }
 }
 
 publicarBtn.onclick = publicarNuevo;
+
+function cargarPublicaciones() {
+    const publicacionesGuardadas = JSON.parse(localStorage.getItem('publicaciones')) || [];
+    publicaciones.innerHTML = ''; // Limpia las publicaciones existentes
+    publicacionesGuardadas.forEach(pub => {
+        const publicacion = document.createElement('div');
+        publicacion.classList.add('publicacion');
+        publicacion.innerHTML = pub;
+        publicaciones.appendChild(publicacion);
+        
+        // Restaurar los controles de video
+        const videos = publicacion.querySelectorAll('video');
+        videos.forEach(video => {
+            video.controls = true;
+        });
+
+        // Solo añadir botones de editar y borrar si el usuario está autenticado
+        if (document.body.classList.contains('autenticado')) {
+            const editarBtn = publicacion.querySelector('.acciones button:first-child');
+            const borrarBtn = publicacion.querySelector('.acciones button:last-child');
+            if (editarBtn) editarBtn.addEventListener('click', () => editarPublicacion(publicacion));
+            if (borrarBtn) borrarBtn.addEventListener('click', () => borrarPublicacion(publicacion));
+        } else {
+            const acciones = publicacion.querySelector('.acciones');
+            if (acciones) acciones.remove();
+        }
+    });
+}
+
+function guardarPublicaciones() {
+    const publicacionesActuales = Array.from(publicaciones.children).map(p => p.outerHTML);
+    localStorage.setItem('publicaciones', JSON.stringify(publicacionesActuales));
+}
 
 // Configuración de particles.js
 particlesJS('particles-js', {
@@ -232,34 +275,8 @@ particlesJS('particles-js', {
     retina_detect: true
 });
 
-// Cargar publicaciones almacenadas al cargar la página
-document.addEventListener('DOMContentLoaded', () => {
-    const publicacionesGuardadas = JSON.parse(localStorage.getItem('publicaciones')) || [];
-    publicacionesGuardadas.forEach(pub => {
-        const publicacion = document.createElement('div');
-        publicacion.classList.add('publicacion');
-        publicacion.innerHTML = pub;
-        publicaciones.appendChild(publicacion);
-        
-        // Restaurar los controles de video
-        const videos = publicacion.querySelectorAll('video');
-        videos.forEach(video => {
-            video.controls = true;
-        });
-
-        // Restaurar los eventos de los botones de editar y borrar
-        const editarBtn = publicacion.querySelector('.acciones button:first-child');
-        const borrarBtn = publicacion.querySelector('.acciones button:last-child');
-        editarBtn.addEventListener('click', () => editarPublicacion(publicacion));
-        borrarBtn.addEventListener('click', () => borrarPublicacion(publicacion));
-    });
-});
-
-// Guardar publicaciones en localStorage antes de cerrar la página
-window.addEventListener('beforeunload', () => {
-    const publicacionesActuales = Array.from(publicaciones.children).map(p => p.outerHTML);
-    localStorage.setItem('publicaciones', JSON.stringify(publicacionesActuales));
-});
+// Cargar publicaciones al iniciar la página
+document.addEventListener('DOMContentLoaded', cargarPublicaciones);
 
 // Efecto de desplazamiento suave
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
