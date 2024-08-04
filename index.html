@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InformandoTec</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="particles-js"></div>
+    <header>
+        <h1>InformandoTec</h1>
+        <button id="adminBtn">Admin</button>
+    </header>
+    <main>
+        <section id="publicaciones"></section>
+        <section id="adminPanel" class="hidden">
+            <input type="password" id="adminPassword" placeholder="Contraseña de administrador">
+            <button id="loginBtn">Iniciar sesión</button>
+            <div id="publicacionForm" class="hidden">
+                <input type="text" id="tituloPublicacion" placeholder="Título de la publicación">
+                <textarea id="nuevaPublicacion" placeholder="Escribe tu publicación aquí"></textarea>
+                <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
+                <button id="publicarBtn">Publicar</button>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
